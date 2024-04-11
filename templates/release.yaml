@@ -1,0 +1,73 @@
+{{- define "trilium.api.hardcodedValues" -}}
+global:
+  nameOverride: api
+
+
+controllers:
+  trilium:
+    containers:
+      trilium:
+        image:
+          repository: trilium/api
+          tag: 0.63.5
+          pullPolicy: IfNotPresent
+        probes:
+          startup:
+            enabled: true
+            custom: true
+            type: TCP
+            spec:
+              initialDelaySeconds: 45  # Time to wait before starting the probe
+              periodSeconds: 10        # How often to perform the probe
+              timeoutSeconds: 5        # Number of seconds after which the probe times out
+              failureThreshold: 10     # Number of times to try the probe before giving up
+              httpGet: &probesPath
+                path: /login
+                port: 8080
+          readiness: &probes
+            enabled: true
+            custom: true
+            spec:
+              initialDelaySeconds: 5   # Time to wait before starting the probe after startup probe succeeds
+              periodSeconds: 20        # How often to perform the probe
+              timeoutSeconds: 10       # Number of seconds after which the probe times out
+              failureThreshold: 3      # Number of times to try the probe before considering the container not ready
+              httpGet: *probesPath
+
+          liveness: *probes
+
+persistence:
+  data:
+    enabled: true
+    type: persistentVolumeClaim
+    size: 10Gi
+    retain: true
+    # Since it's SQLite, the PVC should only be RWO
+    accessMode: ReadWriteOnce
+    advancedMounts:
+      trilium: # controller
+        trilium: # container
+          - path: /home/node/trilium-data
+
+
+service:
+  main:
+    controller: trilium
+    enabled: true
+    ports:
+      http:
+        # What cluster is listening on
+        port: 8080
+        # What port the container is listening on
+        targetPort: 8080
+
+{{ end }}
+
+
+
+{{ if .Values.api.enabled }}
+{{- $ctx := deepCopy . -}}
+{{- $_ := get .Values "api" | mergeOverwrite $ctx.Values -}}
+{{- $_ = include "trilium.api.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
+{{- include "bjw-s.common.loader.all" $ctx }}
+{{ end }}
