@@ -4,32 +4,30 @@
 ## Refer there for more detail about the supported values.
 ## Any values that you find in the above `values.yaml` can be provided to this chart and are then rendered.
 
-api:
-  enabled: true
-  image:
-    repository: trilium/api
-    tag: 0.63.5
-    pullPolicy: IfNotPresent
-  persistence:
-    # This is your trilium data will live, you can either let
-    # the chart create a new PVC for you or provide an existing one.
-    #data:
-    #  enabled: true
-    #  # existingClaim: # your-claim
-    #  accessMode: ReadWriteOnce
-    #  size: 10Gi
-    #  mountPath: /app/trilium/files
-    #  # storageClass: storage-class
-  #ingress:
-  #  main:
-  #    enabled: true
-  #    annotations:
-  #      # proxy-body-size is set to 0 to remove the body limit on file uploads
-  #      nginx.ingress.kubernetes.io/proxy-body-size: "0"
-  #    hosts:
-  #      - host: trilium.local
-  #        paths:
-  #          - path: "/api/v1"
-  #    tls: []
-  env:
-    key: "value"
+image:
+  repository: zadam/trilium
+  tag: 0.63.5
+  pullPolicy: IfNotPresent
+persistence:
+  # This is your trilium data will live, you can either let
+  # the chart create a new PVC for you or provide an existing one.
+  #data:
+  #  enabled: true
+  #  # existingClaim: # your-claim
+  #  accessMode: ReadWriteOnce
+  #  size: 10Gi
+  #  mountPath: /app/trilium/files
+  #  # storageClass: storage-class
+#ingress:
+#  main:
+#    enabled: true
+#    annotations:
+#      # proxy-body-size is set to 0 to remove the body limit on file uploads
+#      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+#    hosts:
+#      - host: trilium.local
+#        paths:
+#          - path: "/api/v1"
+#    tls: []
+env:
+  key: "value"

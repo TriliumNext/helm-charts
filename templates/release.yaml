@@ -1,4 +1,4 @@
-{{- define "trilium.api.hardcodedValues" -}}
+{{- define "trilium.hardcodedValues" -}}
 global:
   nameOverride: api
 
@@ -8,7 +8,7 @@ controllers:
     containers:
       trilium:
         image:
-          repository: trilium/api
+          repository: zadam/trilium
           tag: 0.63.5
           pullPolicy: IfNotPresent
         probes:
@@ -65,9 +65,8 @@ service:
 
 
 
-{{ if .Values.api.enabled }}
 {{- $ctx := deepCopy . -}}
-{{- $_ := get .Values "api" | mergeOverwrite $ctx.Values -}}
-{{- $_ = include "trilium.api.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
+# Merge with ALL the values in `values.yaml`
+{{- $_ := mergeOverwrite .Values $ctx.Values -}}
+{{- $_ = include "trilium.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
 {{- include "bjw-s.common.loader.all" $ctx }}
-{{ end }}
