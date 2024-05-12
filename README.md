@@ -1,7 +1,9 @@
 # ||WIP|| Trilium Helm Chart
 
-This is the Helm Chart for Trilium, to easily deploy Trilium on your Kubernetes cluster. This chart leverages the [bjw-s common library](https://github.com/bjw-s/helm-charts/tree/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common) to further increase the ease of use when deploying.
+This is the Helm Chart for Trilium, to easily deploy Trilium on your Kubernetes cluster. This chart leverages the [bjw-s common library](https://github.com/bjw-s/helm-charts/blob/common-3.1.0/charts/library/common/values.yaml) to further increase the ease of use when deploying. Please view the previous link to see what values you can change/tweak to your needs [here](https://github.com/bjw-s/helm-charts/blob/common-3.1.0/charts/library/common/values.yaml).
 
+
+Below are some examples of what you could provide for the chart's values.
 
 ## Example values
 
@@ -11,6 +13,54 @@ image:
   tag: 0.63.5
   pullPolicy: IfNotPresent
 ```
+
+## Using Helm CLI
+
+## Using GitOps
+
+If you want to use GitOps, essentially using a Git repository as the single source of truth for the applications in your cluster, you can use tools such as ArgoCD or Flux. Below is an example of what an "Application" that creates a Helm release in ArgoCD looks like:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: trilium
+  namespace: argocd
+
+spec:
+  project: default
+  source:
+    chart: trilium
+    repoURL: https://trilium-next.github.io/helm-charts
+    targetRevision: 0.0.1
+    helm:
+      values: |
+		controllers:
+		  trilium:
+			containers:
+			  trilium:
+				image:
+				  repository: zadam/trilium
+				  tag: 0.63.5
+				  pullPolicy: IfNotPresent
+				env:
+				  key: "value"
+
+		persistence:
+		  data:
+			enabled: true
+			type: persistentVolumeClaim
+			existingClaim: my-claim-1
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true 
+```
+
+
 
 ## Development
 
