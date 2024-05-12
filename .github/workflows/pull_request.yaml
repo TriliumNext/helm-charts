@@ -1,0 +1,53 @@
+name: pull-request-validation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - feature/pr-action
+
+jobs:
+  build_lint_validate_diff:
+    name: lint, validate and diff from main
+    permissions: write-all
+    runs-on: ubuntu-latest
+    container:
+      image: alpine/helm:3.14.3
+    steps:
+      - name: checkout pr head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: install chart dependencies
+        run: helm dependency build charts/trilium
+
+      - name: lint helm chart
+        run: helm lint charts/trilium --set trilium.persistence.library.existingClaim=test-pvc
+
+      - name: prepare
+        run: mkdir -p charts/trilium/build
+      - name: create full manifest from pr head
+        run: helm template trilium charts/trilium --set trilium.persistence.library.existingClaim=test-pvc > charts/trilium/build/manifest.yaml
+
+      - name: checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+          path: main
+
+      - name: install chart dependencies
+        run: helm dependency build main/charts/trilium
+
+      - name: prepare
+        run: mkdir -p main/charts/trilium/build
+      - name: create full manifest from main
+        run: helm template trilium main/charts/trilium --set trilium.persistence.library.existingClaim=test-pvc > main/charts/trilium/build/manifest.yaml
+
+      - name: create diff comment
+        uses: int128/diff-action@v1
+        with:
+          base: main/charts/trilium/build
+          head: charts/trilium/build
+          comment-header: "## Changes in Final Manifest"
