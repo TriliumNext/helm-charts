@@ -5,12 +5,19 @@ global:
 
 controllers:
   trilium:
+    initContainers:
+      fixperms:
+        image:
+          repository: busybox
+          tag: latest
+        args: ["sh", "-c", "chown -R 1000:1000 /home/node/trilium-data"]   
     containers:
       trilium:
         image:
           repository: zadam/trilium
           tag: 0.63.5
           pullPolicy: IfNotPresent
+
         probes:
           startup:
             enabled: true
@@ -36,11 +43,13 @@ controllers:
 
           liveness: *probes
 
+
+
 persistence:
   data:
     enabled: true
     type: persistentVolumeClaim
-    size: 10Gi
+    size: 20Gi
     retain: true
     # Since it's SQLite, the PVC should only be RWO
     accessMode: ReadWriteOnce
@@ -49,14 +58,13 @@ persistence:
         trilium: # container
           - path: /home/node/trilium-data
 
-
 service:
   main:
     controller: trilium
     enabled: true
     ports:
       http:
-        # What cluster is listening on
+        # What port the cluster is listening on
         port: 8080
         # What port the container is listening on
         targetPort: 8080

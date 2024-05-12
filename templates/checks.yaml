@@ -1,0 +1,1 @@
+{{- $name := .Values.persistence.data.existingClaim | required "You need to specify an existing PVC in your values, at the path persistence.data.existingClaim" -}}
