@@ -1,23 +1,24 @@
 ## This chart relies on the common library chart from bjw-s
-## You can find it and the values you can provide and modify, at https://github.com/bjw-s/helm-charts/tree/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common
-## Here's the link to the values.yaml file: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml
+## You can find it and the values you can provide and modify, at https://github.com/bjw-s/helm-charts/blob/common-3.1.0/charts/library/common/values.yaml
 ## Refer there for more detail about the supported values.
 ## Any values that you find in the above `values.yaml` can be provided to this chart and are then rendered.
 
-image:
-  repository: zadam/trilium
-  tag: 0.63.5
-  pullPolicy: IfNotPresent
+controllers:
+  trilium:
+    containers:
+      trilium:
+        image:
+          repository: zadam/trilium
+          tag: 0.63.5
+          pullPolicy: IfNotPresent
+        env:
+          key: "value"
+
 persistence:
-  # This is your trilium data will live, you can either let
-  # the chart create a new PVC for you or provide an existing one.
-  #data:
-  #  enabled: true
-  #  # existingClaim: # your-claim
-  #  accessMode: ReadWriteOnce
-  #  size: 10Gi
-  #  mountPath: /app/trilium/files
-  #  # storageClass: storage-class
+  data:
+    enabled: true
+    type: persistentVolumeClaim
+    existingClaim:
 #ingress:
 #  main:
 #    enabled: true
@@ -29,5 +30,4 @@ persistence:
 #        paths:
 #          - path: "/api/v1"
 #    tls: []
-env:
-  key: "value"
+
