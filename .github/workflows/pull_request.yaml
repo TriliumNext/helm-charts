@@ -23,12 +23,12 @@ jobs:
         run: helm dependency build charts/trilium
 
       - name: lint helm chart
-        run: helm lint charts/trilium --set trilium.persistence.library.existingClaim=test-pvc
+        run: helm lint charts/trilium --set persistence.data.existingClaim=test-pvc
 
       - name: prepare
         run: mkdir -p charts/trilium/build
       - name: create full manifest from pr head
-        run: helm template trilium charts/trilium --set trilium.persistence.library.existingClaim=test-pvc > charts/trilium/build/manifest.yaml
+        run: helm template trilium charts/trilium --set persistence.data.existingClaim=test-pvc > charts/trilium/build/manifest.yaml
 
       - name: checkout main
         uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
       - name: prepare
         run: mkdir -p main/charts/trilium/build
       - name: create full manifest from main
-        run: helm template trilium main/charts/trilium --set trilium.persistence.library.existingClaim=test-pvc > main/charts/trilium/build/manifest.yaml
+        run: helm template trilium main/charts/trilium --set persistence.data.existingClaim=test-pvc > main/charts/trilium/build/manifest.yaml
 
       - name: create diff comment
         uses: int128/diff-action@v1

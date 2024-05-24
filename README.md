@@ -1,12 +1,27 @@
-# ||WIP|| Trilium Helm Chart
+# Trilium Helm Chart
 
 This is the Helm Chart for Trilium, to easily deploy Trilium on your Kubernetes cluster. This chart leverages the [bjw-s common library](https://github.com/bjw-s/helm-charts/blob/common-3.1.0/charts/library/common/values.yaml) to further increase the ease of use when deploying. Please view the previous link to see what values you can change/tweak to your needs [here](https://github.com/bjw-s/helm-charts/blob/common-3.1.0/charts/library/common/values.yaml).
 
 
+
+## Requirements
+- A working Kubernetes cluster.
+- A PVC provisioner.
+  - If you don't have one, but have something that serves an NFS share, take a look at the following
+    - [nfs-subdir-external-provisioner](https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner)
+    - [democratic-csi](https://github.com/democratic-csi/democratic-csi)
+
+## Deploying
+
+```bash
+helm repo add trilium https://triliumnext.github.io/helm-charts
+helm install --create-namespace --namespace trilium trilium trilium/trilium -f values.yaml
+```
+
+
+### Example values
+
 Below are some examples of what you could provide for the chart's values.
-
-## Example values
-
 ```yaml
 image:
   repository: zadam/trilium
