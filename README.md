@@ -25,7 +25,7 @@ Below are some examples of what you could provide for the chart's values.
 ```yaml
 image:
   repository: zadam/trilium
-  tag: 0.63.5
+  tag: 0.63.6
   pullPolicy: IfNotPresent
 ```
 
@@ -56,7 +56,7 @@ spec:
 			  trilium:
 				image:
 				  repository: zadam/trilium
-				  tag: 0.63.5
+				  tag: 0.63.6
 				  pullPolicy: IfNotPresent
 				env:
 				  key: "value"

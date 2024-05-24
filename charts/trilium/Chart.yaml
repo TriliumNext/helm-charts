@@ -9,7 +9,7 @@ description: |-
 annotations:
   category: Notes
 version: 0.0.2
-appVersion: 0.63.5
+appVersion: 0.63.6
 kubeVersion: ">= 1.19"
 dependencies:
   - name: common
