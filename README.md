@@ -50,22 +50,22 @@ spec:
     targetRevision: 0.0.1
     helm:
       values: |
-		controllers:
-		  trilium:
-			containers:
-			  trilium:
-				image:
-				  repository: zadam/trilium
-				  tag: 0.63.5
-				  pullPolicy: IfNotPresent
-				env:
-				  key: "value"
+        controllers:
+          trilium:
+          containers:
+            trilium:
+            image:
+              repository: zadam/trilium
+              tag: 0.63.5
+              pullPolicy: IfNotPresent
+            env:
+              key: "value"
 
-		persistence:
-		  data:
-			enabled: true
-			type: persistentVolumeClaim
-			existingClaim: my-claim-1
+        persistence:
+          data:
+          enabled: true
+          type: persistentVolumeClaim
+          existingClaim: my-claim-1
   destination:
     server: "https://kubernetes.default.svc"
     namespace: apps
