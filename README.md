@@ -108,6 +108,8 @@ To use Helm in order to create the individual Kubernetes manifests needed to dep
 
 ```bash
 git clone https://github.com/TriliumNext/helm-charts
-cd helm-chart
+cd helm-chart/charts/trilium
+helm dependency update
+helm package .
 helm template test1 . --namespace testing -f values.yaml --debug > output.yaml
 ```
