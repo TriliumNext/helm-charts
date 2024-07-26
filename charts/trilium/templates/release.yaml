@@ -53,10 +53,9 @@ persistence:
     retain: true
     # Since it's SQLite, the PVC should only be RWO
     accessMode: ReadWriteOnce
-    advancedMounts:
-      trilium: # controller
-        trilium: # container
-          - path: /home/node/trilium-data
+    globalMounts:
+      - path: /home/node/trilium-data
+        readOnly: false
 
 service:
   main:
