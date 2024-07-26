@@ -67,19 +67,18 @@ spec:
               env:
                 key: "value"
 
-        persistence:
-          data:
-            enabled: true
-            type: persistentVolumeClaim
-            existingClaim: my-claim-1
-            destination:
-              server: "https://kubernetes.default.svc"
-              namespace: apps
-
-      syncPolicy:
-        automated:
-          prune: true
-          selfHeal: true 
+		persistence:
+		  data:
+			enabled: true
+			type: persistentVolumeClaim
+			existingClaim: my-claim-1
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true 
 ```
 
 ### Modifying Deployed Resources
