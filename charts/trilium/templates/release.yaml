@@ -4,7 +4,7 @@ global:
 
 
 controllers:
-  trilium:
+  main:
     initContainers:
       fixperms:
         image:
@@ -15,7 +15,7 @@ controllers:
       trilium:
         image:
           repository: zadam/trilium
-          tag: 0.63.6
+          tag: 0.63.7
           pullPolicy: IfNotPresent
 
         probes:
