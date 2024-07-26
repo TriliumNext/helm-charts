@@ -59,7 +59,7 @@ persistence:
 
 service:
   main:
-    controller: trilium
+    controller: main
     enabled: true
     ports:
       http:
