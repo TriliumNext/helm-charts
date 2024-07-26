@@ -1,0 +1,19 @@
+controllers:
+  main:
+    containers:
+      trilium:
+      image:
+        repository: zadam/trilium
+        tag: 0.63.7
+        pullPolicy: IfNotPresent
+      env:
+        key: "value"
+
+persistence:
+  data:
+    enabled: true
+    type: persistentVolumeClaim
+    existingClaim: my-claim-1
+    destination:
+      server: "https://kubernetes.default.svc"
+      namespace: apps
