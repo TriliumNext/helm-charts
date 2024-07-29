@@ -1,14 +1,14 @@
 apiVersion: v2
 type: application
 name: trilium
-home: https://github.com/TriliumNext/helm-chart
-icon: https://github.com/TriliumNext/helm-chart/commit/icon.png
+home: https://github.com/TriliumNext/helm-charts
+icon: https://github.com/TriliumNext/helm-charts/commit/icon.png
 deprecated: false
 description: |-
   Build your personal knowledge base with Trilium Notes. A hierarchical note taking application with focus on building large personal knowledge bases.
 annotations:
   category: Notes
-version: 1.0.0
+version: 1.0.1
 appVersion: 0.63.7
 kubeVersion: ">= 1.19"
 dependencies:
@@ -36,11 +36,11 @@ keywords:
   - note-taker
   - local-first
 maintainers:
-  - name: trilium
-    url: https://github.com/zadam/trilium
+  - name: triliumnext
+    url: https://github.com/TriliumNext/Notes
   - name: perfectra1n
     email: jon@jonfuller.io
     url: https://perf3ct.tech
 sources:
-  - https://github.com/TriliumNext/helm-chart
-  - https://github.com/zadam/trilium
+  - https://github.com/TriliumNext/helm-charts
+  - hhttps://github.com/TriliumNext/Notes

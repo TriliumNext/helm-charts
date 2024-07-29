@@ -4,6 +4,10 @@ This is the Helm Chart for Trilium, to easily deploy Trilium on your Kubernetes 
 
 Please refer to the section "Modifying Deployed Resources" below on how to customize the deployment, or refer to the examples in [the examples folder](./examples/)
 
+Seperate from the [values.yaml](./charts/trilium/values.yaml), please also view the additional files in the [templates](./charts/trilium/templates/) folder to see the additional values that are provided to Helm, to create the Kubernetes release. These values can also be overridden, and the defaults should be completely unobtrusive to any changes that are commonly made.
+
+If you find that a value in your release is inconsistent with those found in the [values.yaml](./charts/trilium/values.yaml) and the [bjw-s common library](https://github.com/bjw-s/helm-charts/blob/common-3.2.1/charts/library/common/values.yaml), then they are being modified in the [templates](./charts/trilium/templates/) folder. Any value changes specified by the user override any values defined within this chart.
+
 ## Requirements
 
 - A working Kubernetes cluster.
@@ -87,7 +91,7 @@ Often times, modifications need to be made to a Helm chart to allow it to operat
 
 Anything you see [here](https://github.com/bjw-s/helm-charts/blob/d9e8c23df242dd9a2dda7c3738360928526d7a20/charts/library/common/values.yaml), including the top-level keys, can be added and subtracted from this chart's `values.yaml`.
 
-For example, if you wished to create a `serviceAccount` as can be seen [here](https://github.com/bjw-s/helm-charts/blob/d9e8c23df242dd9a2dda7c3738360928526d7a20/charts/library/common/values.yaml#L364-L376):
+For example, if you wished to create a `serviceAccount`, refer to the values [here](https://github.com/bjw-s/helm-charts/blob/d9e8c23df242dd9a2dda7c3738360928526d7a20/charts/library/common/values.yaml#L364-L376), and override them as needed. So, to create a `serviceAccount`, you would want to add YAML below to your Helm release values:
 
 ```yaml
 serviceAccount:
