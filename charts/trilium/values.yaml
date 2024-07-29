@@ -4,12 +4,12 @@
 ## Any values that you find in the above `values.yaml` can be provided to this chart and are then rendered.
 
 controllers:
-  trilium:
+  main:
     containers:
       trilium:
         image:
           repository: zadam/trilium
-          tag: 0.63.6
+          tag: 0.63.7
           pullPolicy: IfNotPresent
         env:
           key: "value"

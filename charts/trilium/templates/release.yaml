@@ -4,7 +4,7 @@ global:
 
 
 controllers:
-  trilium:
+  main:
     initContainers:
       fixperms:
         image:
@@ -15,7 +15,7 @@ controllers:
       trilium:
         image:
           repository: zadam/trilium
-          tag: 0.63.5
+          tag: 0.63.7
           pullPolicy: IfNotPresent
 
         probes:
@@ -53,14 +53,13 @@ persistence:
     retain: true
     # Since it's SQLite, the PVC should only be RWO
     accessMode: ReadWriteOnce
-    advancedMounts:
-      trilium: # controller
-        trilium: # container
-          - path: /home/node/trilium-data
+    globalMounts:
+      - path: /home/node/trilium-data
+        readOnly: false
 
 service:
   main:
-    controller: trilium
+    controller: main
     enabled: true
     ports:
       http:

@@ -1,10 +1,11 @@
 # Trilium Helm Chart
 
-This is the Helm Chart for Trilium, to easily deploy Trilium on your Kubernetes cluster. This chart leverages the [bjw-s common library](https://github.com/bjw-s/helm-charts/blob/common-3.1.0/charts/library/common/values.yaml) to further increase the ease of use when deploying. Please view the previous link to see what values you can change/tweak to your needs [here](https://github.com/bjw-s/helm-charts/blob/common-3.1.0/charts/library/common/values.yaml).
+This is the Helm Chart for Trilium, to easily deploy Trilium on your Kubernetes cluster. This chart leverages the [bjw-s common library](https://github.com/bjw-s/helm-charts/blob/common-3.2.1/charts/library/common/values.yaml) to further increase the ease of use when deploying. Please view the previous link to see what values you can change/tweak to your needs [here](https://github.com/bjw-s/helm-charts/blob/common-3.2.1/charts/library/common/values.yaml).
 
-
+Please refer to the section "Modifying Deployed Resources" below on how to customize the deployment, or refer to the examples in [the examples folder](./examples/)
 
 ## Requirements
+
 - A working Kubernetes cluster.
 - A PVC provisioner.
   - If you don't have one, but have something that serves an NFS share, take a look at the following
@@ -18,18 +19,23 @@ helm repo add trilium https://triliumnext.github.io/helm-charts
 helm install --create-namespace --namespace trilium trilium trilium/trilium -f values.yaml
 ```
 
-
 ### Example values
 
 Below are some examples of what you could provide for the chart's values.
+
 ```yaml
 image:
   repository: zadam/trilium
-  tag: 0.63.5
+  tag: 0.63.7
   pullPolicy: IfNotPresent
 ```
 
 ## Using Helm CLI
+
+```bash
+helm repo add trilium https://triliumnext.github.io/helm-charts
+helm install --create-namespace --namespace trilium trilium trilium/trilium
+```
 
 ## Using GitOps
 
@@ -51,21 +57,21 @@ spec:
     helm:
       values: |
         controllers:
-          trilium:
-          containers:
-            trilium:
-            image:
-              repository: zadam/trilium
-              tag: 0.63.5
-              pullPolicy: IfNotPresent
-            env:
-              key: "value"
+          main:
+            containers:
+              trilium:
+              image:
+                repository: zadam/trilium
+                tag: 0.63.7
+                pullPolicy: IfNotPresent
+              env:
+                key: "value"
 
-        persistence:
-          data:
-          enabled: true
-          type: persistentVolumeClaim
-          existingClaim: my-claim-1
+		persistence:
+		  data:
+			enabled: true
+			type: persistentVolumeClaim
+			existingClaim: my-claim-1
   destination:
     server: "https://kubernetes.default.svc"
     namespace: apps
@@ -75,14 +81,35 @@ spec:
       selfHeal: true 
 ```
 
+### Modifying Deployed Resources
 
+Often times, modifications need to be made to a Helm chart to allow it to operate in your Kubernetes cluster. By utilizing bjw-s's `common` library, there are quite a few options that can be easily modified.
+
+Anything you see [here](https://github.com/bjw-s/helm-charts/blob/d9e8c23df242dd9a2dda7c3738360928526d7a20/charts/library/common/values.yaml), including the top-level keys, can be added and subtracted from this chart's `values.yaml`.
+
+For example, if you wished to create a `serviceAccount` as can be seen [here](https://github.com/bjw-s/helm-charts/blob/d9e8c23df242dd9a2dda7c3738360928526d7a20/charts/library/common/values.yaml#L364-L376):
+
+```yaml
+serviceAccount:
+  create: true
+```
+
+Then, (for some reason), if you wished to change the Deployment type to `DaemonSet`, ([referencing the values here](https://github.com/bjw-s/helm-charts/blob/d9e8c23df242dd9a2dda7c3738360928526d7a20/charts/library/common/values.yaml#L96)), you could do the following:
+
+```yaml
+controllers:
+  main:
+    type: daemonset
+```  
 
 ## Development
 
 To use Helm in order to create the individual Kubernetes manifests needed to deploy it "by hand", you can use the following commands:
+
 ```bash
-git clone https://github.com/TriliumNext/helm-chart
-cd helm-chart
+git clone https://github.com/TriliumNext/helm-charts
+cd helm-chart/charts/trilium
+helm dependency update
+helm package .
 helm template test1 . --namespace testing -f values.yaml --debug > output.yaml
 ```
-
