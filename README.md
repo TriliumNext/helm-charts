@@ -1,10 +1,10 @@
 # Trilium Helm Chart
 
-This is the Helm Chart for Trilium, to easily deploy Trilium on your Kubernetes cluster. This chart leverages the [bjw-s common library](https://github.com/bjw-s/helm-charts/blob/common-3.2.1/charts/library/common/values.yaml) to further increase the ease of use when deploying. Please view the previous link to see what values you can change/tweak to your needs [here](https://github.com/bjw-s/helm-charts/blob/common-3.2.1/charts/library/common/values.yaml).
+This is the Helm Chart for Trilium, to easily deploy Trilium on your Kubernetes cluster. This chart leverages the [bjw-s common library](https://github.com/bjw-s/helm-charts/blob/common-3.2.1/charts/library/common/values.yaml) which inherits all the possible [values](https://github.com/bjw-s/helm-charts/blob/common-3.2.1/charts/library/common/values.yaml) of that template.
 
 Please refer to the section "Modifying Deployed Resources" below on how to customize the deployment, or refer to the examples in [the examples folder](./examples/)
 
-Seperate from the [values.yaml](./charts/trilium/values.yaml), please also view the additional files in the [templates](./charts/trilium/templates/) folder to see the additional values that are provided to Helm, to create the Kubernetes release. These values can also be overridden, and the defaults should be completely unobtrusive to any changes that are commonly made.
+Aside from the [values.yaml](./charts/trilium/values.yaml), please also view the additional files in the [templates](./charts/trilium/templates/) folder to see the additional values that are provided to Helm, to create the Kubernetes release. These values can also be overridden, and the defaults should be completely unobtrusive to any changes that are commonly made.
 
 If you find that a value in your release is inconsistent with those found in the [values.yaml](./charts/trilium/values.yaml) and the [bjw-s common library](https://github.com/bjw-s/helm-charts/blob/common-3.2.1/charts/library/common/values.yaml), then they are being modified in the [templates](./charts/trilium/templates/) folder. Any value changes specified by the user override any values defined within this chart.
 
