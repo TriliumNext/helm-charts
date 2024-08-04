@@ -28,10 +28,22 @@ helm install --create-namespace --namespace trilium trilium trilium/trilium -f v
 Below are some examples of what you could provide for the chart's values, for additional examples, please check out [the examples folder](./examples/).
 
 ```yaml
-image:
-  repository: zadam/trilium
-  tag: 0.63.7
-  pullPolicy: IfNotPresent
+controllers:
+  main:
+    containers:
+      trilium:
+        image:
+          repository: zadam/trilium
+          tag: 0.63.7
+          pullPolicy: IfNotPresent
+        env:
+          key: "value"
+
+persistence:
+  data:
+    enabled: true
+    type: persistentVolumeClaim
+    existingClaim: trilium-data-pvc
 ```
 
 ## Using Helm CLI
