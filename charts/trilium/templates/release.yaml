@@ -1,8 +1,4 @@
 {{- define "trilium.hardcodedValues" -}}
-global:
-  nameOverride: api
-
-
 controllers:
   main:
     initContainers:
@@ -14,8 +10,8 @@ controllers:
     containers:
       trilium:
         image:
-          repository: zadam/trilium
-          tag: 0.63.7
+          repository: triliumnext/notes
+          tag: 0.90.4
           pullPolicy: IfNotPresent
 
         probes:
