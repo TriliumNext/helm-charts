@@ -39,8 +39,6 @@ controllers:
 
           liveness: *probes
 
-
-
 persistence:
   data:
     enabled: true
@@ -60,7 +58,7 @@ service:
     ports:
       http:
         # What port the cluster is listening on
-        port: 8080
+        port: 80
         # What port the container is listening on
         targetPort: 8080
 
