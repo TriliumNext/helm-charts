@@ -9,7 +9,7 @@ controllers:
       trilium:
         image:
           repository: triliumnext/notes
-          tag: 0.90.4
+          tag: v0.90.4
           pullPolicy: IfNotPresent
         env:
           key: "value"

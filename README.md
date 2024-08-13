@@ -33,8 +33,8 @@ controllers:
     containers:
       trilium:
         image:
-          repository: zadam/trilium
-          tag: 0.63.7
+          repository: triliumnext/notes
+          tag: v0.90.4
           pullPolicy: IfNotPresent
         env:
           key: "value"
@@ -69,7 +69,7 @@ spec:
   source:
     chart: trilium
     repoURL: https://trilium-next.github.io/helm-charts
-    targetRevision: 0.0.1
+    targetRevision: 1.0.3
     helm:
       values: |
         controllers:
