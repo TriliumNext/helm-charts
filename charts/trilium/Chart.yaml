@@ -8,13 +8,13 @@ description: |-
   Build your personal knowledge base with Trilium Notes. A hierarchical note taking application with focus on building large personal knowledge bases.
 annotations:
   category: Notes
-version: 1.0.3
-appVersion: 0.63.7
+version: 1.1.0
+appVersion: 0.90.4
 kubeVersion: ">= 1.19"
 dependencies:
   - name: common
     repository: https://bjw-s.github.io/helm-charts
-    version: 3.2.1
+    version: 3.3.2
 keywords:
   - electron
   - wiki

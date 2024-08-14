@@ -1,5 +1,5 @@
 ## This chart relies on the common library chart from bjw-s
-## You can find it and the values you can provide and modify, at https://github.com/bjw-s/helm-charts/blob/common-3.1.0/charts/library/common/values.yaml
+## You can find it and the values you can provide and modify, at https://github.com/bjw-s/helm-charts/blob/common-3.3.2/charts/library/common/values.yaml
 ## Refer there for more detail about the supported values.
 ## Any values that you find in the above `values.yaml` can be provided to this chart and are then rendered.
 
