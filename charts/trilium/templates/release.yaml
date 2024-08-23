@@ -6,7 +6,10 @@ controllers:
         image:
           repository: busybox
           tag: latest
-        args: ["sh", "-c", "chown -R 1000:1000 /home/node/trilium-data"]   
+        args: ["sh", "-c", "chown -R 1000:1000 /home/node/trilium-data"]
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
     containers:
       trilium:
         image:
