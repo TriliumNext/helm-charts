@@ -55,6 +55,14 @@ persistence:
     globalMounts:
       - path: /home/node/trilium-data
         readOnly: false
+  config:
+    enabled: true
+    type: configMap
+    name: {{ .Release.Name }}-config
+    mountPath: /home/node/trilium-data/config.ini
+    subPath: config.ini
+    readOnly: true
+
 
 service:
   main:
@@ -75,4 +83,5 @@ service:
 # Merge with ALL the values in `values.yaml`
 {{- $_ := mergeOverwrite .Values $ctx.Values -}}
 {{- $_ = include "trilium.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
+{{- $_ = include "trilium.configini" . | fromYaml | merge $ctx.Values -}}
 {{- include "bjw-s.common.loader.all" $ctx }}
