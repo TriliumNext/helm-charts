@@ -55,6 +55,18 @@ persistence:
     globalMounts:
       - path: /home/node/trilium-data
         readOnly: false
+  config:
+    enabled: true
+    type: configMap
+    name: {{ .Release.Name }}-config
+    readOnly: true
+    advancedMounts:
+      main:
+        trilium:
+          - path: /home/node/trilium-data/config.ini
+            subPath: config.ini
+    
+
 
 service:
   main:

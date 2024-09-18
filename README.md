@@ -118,6 +118,27 @@ controllers:
     type: daemonset
 ```  
 
+## Modifying the `config.ini`
+
+Trilium also has a `config.ini` that allows you to [modify some values](https://github.com/TriliumNext/Notes/blob/7ca4cddc5868f4a80b8804ad93a35bf4bc8cc812/config-sample.ini). The values you set within them are mostly self-explanatory, but if you need to change any of the values, modify the following section within the `values.yaml` to the value you want them to be.
+
+```yaml
+configini:
+  general:
+    instanceName: ""
+    # Disable authentication to Trilium? (if you're running it on a private network, or have authentication handled by another component)
+    noAuthentication: false
+    # Disable backups of the database?
+    noBackup: false
+  network:
+    host: "0.0.0.0"
+    port: 8080
+    https: false
+    certPath: ""
+    keyPath: ""
+    trustedReverseProxy: true
+```
+
 ## Development
 
 To use Helm in order to create the individual Kubernetes manifests needed to deploy it "by hand", you can use the following commands:
