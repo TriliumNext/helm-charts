@@ -9,3 +9,5 @@ __snapshot__/
 _site/output1.yaml
 
 output*
+
+*.tgz
