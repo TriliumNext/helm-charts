@@ -69,17 +69,17 @@ spec:
   source:
     chart: trilium
     repoURL: https://trilium-next.github.io/helm-charts
-    targetRevision: 1.0.3
+    targetRevision: 1.2.0
     helm:
       values: |
         controllers:
           main:
             containers:
               trilium:
-              image:
-                repository: zadam/trilium
-                tag: 0.63.7
-                pullPolicy: IfNotPresent
+                image:
+                  repository: triliumnext/notes
+                  tag: v0.90.4
+                  pullPolicy: IfNotPresent
               env:
                 key: "value"
 
