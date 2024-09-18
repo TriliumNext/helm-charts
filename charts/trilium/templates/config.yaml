@@ -1,4 +1,3 @@
-{{- define "trilium.configini" -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -40,5 +39,4 @@ data:
     # once set, expressjs will use the X-Forwarded-For header set by the rev. proxy to determinate the real IPs of clients.
     # expressjs shortcuts are supported: loopback(127.0.0.1/8, ::1/128), linklocal(169.254.0.0/16, fe80::/10), uniquelocal(10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7)
     trustedReverseProxy=true
-{{ end }}
 
