@@ -83,11 +83,11 @@ spec:
               env:
                 key: "value"
 
-		persistence:
-		  data:
-			enabled: true
-			type: persistentVolumeClaim
-			existingClaim: my-claim-1
+        persistence:
+          data:
+          enabled: true
+          type: persistentVolumeClaim
+          existingClaim: my-claim-1
   destination:
     server: "https://kubernetes.default.svc"
     namespace: apps
