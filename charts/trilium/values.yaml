@@ -21,21 +21,20 @@ persistence:
     existingClaim:
 
 # This is used to modify the config.ini of the Trilium instance
-trilium:
-  config:
-    general:
-      instanceName: ""
-      # Disable authentication to Trilium? (if you're running it on a private network, or have authentication handled by another component)
-      noAuthentication: false
-      # Disable backups of the database?
-      noBackup: false
-    network:
-      host: "0.0.0.0"
-      port: 8080
-      https: false
-      certPath: ""
-      keyPath: ""
-      trustedReverseProxy: true
+configini:
+  general:
+    instanceName: ""
+    # Disable authentication to Trilium? (if you're running it on a private network, or have authentication handled by another component)
+    noAuthentication: false
+    # Disable backups of the database?
+    noBackup: false
+  network:
+    host: "0.0.0.0"
+    port: 8080
+    https: false
+    certPath: ""
+    keyPath: ""
+    trustedReverseProxy: true
 #ingress:
 #  main:
 #    enabled: true
