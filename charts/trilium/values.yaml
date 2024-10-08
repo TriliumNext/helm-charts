@@ -11,8 +11,8 @@ controllers:
           repository: triliumnext/notes
           tag: v0.90.4
           pullPolicy: IfNotPresent
-        env:
-          key: "value"
+        #env:
+        #  key: "value"
 
 persistence:
   data:
