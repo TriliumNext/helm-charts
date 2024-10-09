@@ -16,6 +16,9 @@ controllers:
           repository: triliumnext/notes
           tag: v0.90.4
           pullPolicy: IfNotPresent
+        env:
+          USER_UID: {{ .Values.permissions.runAsUser }}
+          USER_GID: {{ .Values.permissions.runAsGroup }}
 
         probes:
           startup:
@@ -42,9 +45,9 @@ controllers:
 
           liveness: *probes
         # Defines what user and group the container should run as
+        # Trilium needs to run as root initially to allow the start-docker.sh to 
+        # change the user/group permissions that we set
         securityContext:
-          runAsUser: {{ .Values.permissions.runAsUser }}
-          runAsGroup: {{ .Values.permissions.runAsGroup }}
           fsGroup: {{ .Values.permissions.fsGroup }}
           fsGroupChangePolicy: {{ .Values.permissions.fsGroupChangePolicy }}
 
