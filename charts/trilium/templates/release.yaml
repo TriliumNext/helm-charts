@@ -6,7 +6,7 @@ controllers:
         image:
           repository: busybox
           tag: latest
-        args: ["sh", "-c", "chown -R 1000:1000 /home/node/trilium-data"]
+        args: ["sh", "-c", "chown -R {{ .Values.permissions.runAsUser }}:{{ .Values.permissions.runAsGroup }} /home/node/trilium-data"]
         securityContext:
           runAsUser: 0
           runAsGroup: 0
@@ -16,6 +16,9 @@ controllers:
           repository: triliumnext/notes
           tag: v0.90.4
           pullPolicy: IfNotPresent
+        env:
+          USER_UID: {{ .Values.permissions.runAsUser }}
+          USER_GID: {{ .Values.permissions.runAsGroup }}
 
         probes:
           startup:
@@ -41,7 +44,12 @@ controllers:
               httpGet: *probesPath
 
           liveness: *probes
-
+        # Defines what user and group the container should run as
+        # Trilium needs to run as root initially to allow the start-docker.sh to 
+        # change the user/group permissions that we set
+        securityContext:
+          fsGroup: {{ .Values.permissions.fsGroup }}
+          fsGroupChangePolicy: {{ .Values.permissions.fsGroupChangePolicy }}
 
 
 persistence:

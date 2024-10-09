@@ -11,14 +11,21 @@ controllers:
           repository: triliumnext/notes
           tag: v0.90.4
           pullPolicy: IfNotPresent
-        env:
-          key: "value"
+        #env:
+        #  key: "value"
 
 persistence:
   data:
     enabled: true
     type: persistentVolumeClaim
     existingClaim:
+
+# Define permissions for the containers (the UID and GID of the user running the container)
+permissions:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
 
 # This is used to modify the config.ini of the Trilium instance
 configini:
