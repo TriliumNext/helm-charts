@@ -34,7 +34,7 @@ controllers:
       trilium:
         image:
           repository: triliumnext/notes
-          tag: v0.90.4
+          tag: v0.90.8
           pullPolicy: IfNotPresent
         env:
           key: "value"
@@ -78,7 +78,7 @@ spec:
               trilium:
                 image:
                   repository: triliumnext/notes
-                  tag: v0.90.4
+                  tag: v0.90.8
                   pullPolicy: IfNotPresent
               env:
                 key: "value"
