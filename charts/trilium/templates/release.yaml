@@ -35,7 +35,7 @@ controllers:
             custom: true
             spec:
               initialDelaySeconds: 5   # Time to wait before starting the probe after startup probe succeeds
-              periodSeconds: 20        # How often to perform the probe
+              periodSeconds: 10        # How often to perform the probe
               timeoutSeconds: 10       # Number of seconds after which the probe times out
               failureThreshold: 3      # Number of times to try the probe before considering the container not ready
               httpGet: *probesPath
