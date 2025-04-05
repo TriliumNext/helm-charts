@@ -8,8 +8,8 @@ description: |-
   Build your personal knowledge base with Trilium Notes. A hierarchical note taking application with focus on building large personal knowledge bases.
 annotations:
   category: Notes
-version: 1.2.0
-appVersion: 0.90.4
+version: 1.3.0
+appVersion: 0.92.4
 kubeVersion: ">= 1.19"
 dependencies:
   - name: common
