@@ -12,11 +12,6 @@ controllers:
           runAsGroup: 0
     containers:
       trilium:
-        image:
-          repository: triliumnext/notes
-          tag: v0.90.8
-          pullPolicy: IfNotPresent
-
         probes:
           startup:
             enabled: true
@@ -42,8 +37,6 @@ controllers:
 
           liveness: *probes
 
-
-
 persistence:
   data:
     enabled: true
@@ -65,8 +58,6 @@ persistence:
         trilium:
           - path: /home/node/trilium-data/config.ini
             subPath: config.ini
-    
-
 
 service:
   main:

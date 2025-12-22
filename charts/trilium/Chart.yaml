@@ -9,7 +9,7 @@ description: |-
 annotations:
   category: Notes
 version: 1.3.0
-appVersion: 0.92.4
+appVersion: 0.100.0
 kubeVersion: ">= 1.19"
 dependencies:
   - name: common
@@ -37,10 +37,10 @@ keywords:
   - local-first
 maintainers:
   - name: triliumnext
-    url: https://github.com/TriliumNext/Notes
+    url: https://github.com/TriliumNext/Trilium
   - name: perfectra1n
     email: jon@jonfuller.io
     url: https://perf3ct.tech
 sources:
   - https://github.com/TriliumNext/helm-charts
-  - hhttps://github.com/TriliumNext/Notes
+  - https://github.com/TriliumNext/Trilium
