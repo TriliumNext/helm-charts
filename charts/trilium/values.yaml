@@ -8,8 +8,8 @@ controllers:
     containers:
       trilium:
         image:
-          repository: triliumnext/notes
-          tag: v0.92.4
+          repository: triliumnext/trilium
+          tag: v0.100.0
           pullPolicy: IfNotPresent
         env:
           key: "value"
