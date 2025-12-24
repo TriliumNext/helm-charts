@@ -13,8 +13,8 @@ appVersion: 0.92.4
 kubeVersion: ">= 1.19"
 dependencies:
   - name: common
-    repository: https://bjw-s.github.io/helm-charts
-    version: 3.3.2
+    repository: https://bjw-s-labs.github.io/helm-charts
+    version: 4.5.0
 keywords:
   - electron
   - wiki
