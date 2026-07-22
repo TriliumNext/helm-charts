@@ -59,6 +59,8 @@ jobs:
 
       - name: Package chart
         run: |
+          # dependency build from a committed Chart.lock needs the repo registered
+          helm repo add bjw-s-labs https://bjw-s-labs.github.io/helm-charts --force-update
           helm dependency build charts/trilium
           mkdir -p dist
           helm package charts/trilium --destination dist

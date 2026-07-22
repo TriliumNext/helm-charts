@@ -63,6 +63,8 @@ jobs:
         if: steps.changes.outputs.chart == 'true'
         run: |
           curl -fsSL https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz | tar -xz kubeconform
+          # dependency build from a committed Chart.lock needs the repo registered
+          helm repo add bjw-s-labs https://bjw-s-labs.github.io/helm-charts --force-update
           helm dependency build charts/trilium
           helm template trilium charts/trilium | ./kubeconform -strict -summary -kubernetes-version 1.28.0
           for f in charts/trilium/ci/*-values.yaml; do
@@ -106,6 +108,8 @@ jobs:
         if: steps.changes.outputs.chart == 'true'
         run: |
           mkdir -p head base
+          # dependency build from a committed Chart.lock needs the repo registered
+          helm repo add bjw-s-labs https://bjw-s-labs.github.io/helm-charts --force-update
           helm dependency build charts/trilium
           helm template trilium charts/trilium > head/manifest.yaml
           # Base-side failures must not fail the job: the chart on main may be
