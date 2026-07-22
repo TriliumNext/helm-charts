@@ -4,6 +4,42 @@ entries:
   - annotations:
       category: Notes
     apiVersion: v2
+    appVersion: v0.104.0
+    created: "2026-07-22T19:01:40.110320931Z"
+    dependencies:
+    - name: common
+      repository: https://bjw-s-labs.github.io/helm-charts
+      version: 5.0.1
+    description: Build your personal knowledge base with Trilium Notes. A hierarchical
+      note taking application with focus on building large personal knowledge bases.
+    digest: 38e4fd10ebde4e5e236fdb0a48abfb4a701f4cc7a0e9d962b0f6946135bdd45b
+    home: https://github.com/TriliumNext/helm-charts
+    icon: https://raw.githubusercontent.com/TriliumNext/Trilium/main/apps/client/src/assets/icon.png
+    keywords:
+    - trilium
+    - notes
+    - wiki
+    - knowledge-base
+    - note-taking
+    - self-hosted
+    kubeVersion: '>=1.28.0-0'
+    maintainers:
+    - name: triliumnext
+      url: https://github.com/TriliumNext
+    - email: jon@jonfuller.io
+      name: perfectra1n
+      url: https://perf3ct.tech
+    name: trilium
+    sources:
+    - https://github.com/TriliumNext/helm-charts
+    - https://github.com/TriliumNext/Trilium
+    type: application
+    urls:
+    - https://github.com/TriliumNext/helm-charts/releases/download/trilium-2.0.0/trilium-2.0.0.tgz
+    version: 2.0.0
+  - annotations:
+      category: Notes
+    apiVersion: v2
     appVersion: 0.92.4
     created: "2025-04-05T00:17:22.531169621Z"
     dependencies:
@@ -442,4 +478,4 @@ entries:
     urls:
     - https://github.com/TriliumNext/helm-chart/releases/download/trilium-0.0.2/trilium-0.0.2.tgz
     version: 0.0.2
-generated: "2025-04-05T00:17:22.531195981Z"
+generated: "2026-07-22T19:01:40.104126456Z"
