@@ -1,0 +1,12 @@
+---
+remote: origin
+target-branch: main
+chart-dirs:
+  - charts
+chart-repos:
+  - bjw-s-labs=https://bjw-s-labs.github.io/helm-charts
+# release-please owns version bumps, so PRs do not need to increment the version
+check-version-increment: false
+# the "triliumnext" maintainer is a GitHub org, which fails user validation
+validate-maintainers: false
+helm-extra-args: --timeout 600s
