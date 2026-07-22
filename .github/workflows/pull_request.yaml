@@ -47,15 +47,26 @@ jobs:
       - name: Setup chart-testing
         uses: helm/chart-testing-action@6ec842c01de15ebb84c8627d2744a0c2f2755c9f # v2.8.0
 
+      - name: Detect chart changes
+        id: changes
+        run: |
+          if git diff --quiet origin/main...HEAD -- charts/; then
+            echo "chart=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "chart=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run chart-testing lint
         run: ct lint --config ct.yaml
 
       - name: Validate rendered manifests with kubeconform
+        if: steps.changes.outputs.chart == 'true'
         run: |
           curl -fsSL https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz | tar -xz kubeconform
           helm dependency build charts/trilium
           helm template trilium charts/trilium | ./kubeconform -strict -summary -kubernetes-version 1.28.0
           for f in charts/trilium/ci/*-values.yaml; do
+            [ -f "${f}" ] || continue
             echo "--- validating with ${f}"
             helm template trilium charts/trilium -f "${f}" | ./kubeconform -strict -summary -kubernetes-version 1.28.0
           done
@@ -69,6 +80,8 @@ jobs:
     steps:
       - name: Checkout PR head
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - name: Checkout main
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -76,10 +89,21 @@ jobs:
           ref: main
           path: main
 
+      - name: Detect chart changes
+        id: changes
+        run: |
+          if git diff --quiet origin/main...HEAD -- charts/; then
+            echo "chart=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "chart=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Helm
+        if: steps.changes.outputs.chart == 'true'
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
 
       - name: Render manifests
+        if: steps.changes.outputs.chart == 'true'
         run: |
           mkdir -p head base
           helm dependency build charts/trilium
@@ -92,6 +116,7 @@ jobs:
             || echo "# main failed to render" > base/manifest.yaml
 
       - name: Comment manifest diff
+        if: steps.changes.outputs.chart == 'true'
         uses: int128/diff-action@d568d28eca4411ad141d5cd5f84c7b739a0956ce # v2.31.0
         with:
           base: base
