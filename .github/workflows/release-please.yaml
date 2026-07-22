@@ -1,0 +1,115 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Release Please
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      tag_name: ${{ steps.release.outputs['charts/trilium--tag_name'] }}
+      version: ${{ steps.release.outputs['charts/trilium--version'] }}
+    steps:
+      - name: Release Please
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    name: Publish chart
+    needs: release-please
+    if: needs.release-please.outputs.releases_created == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write # upload the release asset, push the gh-pages index
+      packages: write # push the OCI chart to ghcr.io
+      id-token: write # cosign keyless signing
+    env:
+      TAG: ${{ needs.release-please.outputs.tag_name }}
+      VERSION: ${{ needs.release-please.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Helm
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Package chart
+        run: |
+          helm dependency build charts/trilium
+          mkdir -p dist
+          helm package charts/trilium --destination dist
+
+      - name: Upload chart to the GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${TAG}" "dist/trilium-${VERSION}.tgz" --clobber
+
+      - name: Log in to GHCR
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push chart to GHCR (OCI)
+        id: push
+        run: |
+          set -o pipefail
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          helm push "dist/trilium-${VERSION}.tgz" "oci://ghcr.io/${owner}/helm-charts" 2>&1 | tee push.log
+          digest="$(awk '/^Digest:/ {print $2}' push.log)"
+          if [ -z "${digest}" ]; then
+            echo "::error::could not parse the chart digest from the helm push output"
+            exit 1
+          fi
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+
+      - name: Sign chart with Cosign (keyless)
+        env:
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          cosign sign --yes "ghcr.io/${owner}/helm-charts/trilium@${DIGEST}"
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Update the helm repo index on gh-pages
+        run: |
+          helm repo index dist \
+            --merge gh-pages/index.yaml \
+            --url "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}"
+          cp dist/index.yaml gh-pages/index.yaml
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.yaml
+          git commit -m "chore: update index for ${TAG}"
+          git push origin gh-pages
