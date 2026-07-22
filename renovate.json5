@@ -1,0 +1,59 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":semanticCommits",
+    "helpers:pinGitHubActionDigests",
+    // Bumps Chart.yaml appVersion from the image tag via the
+    // `# renovate: image=...` comment above it.
+    "customManagers:helmChartYamlAppVersions",
+  ],
+  dependencyDashboard: true,
+  labels: ["dependencies"],
+  packageRules: [
+    {
+      description: "Group the Trilium image (values.yaml tag + Chart.yaml appVersion) into one PR; app bumps release a chart minor",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["triliumnext/trilium"],
+      groupName: "trilium",
+      semanticCommitType: "feat",
+      semanticCommitScope: "trilium",
+    },
+    {
+      description: "Utility image bumps (busybox) release a chart patch",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["busybox"],
+      semanticCommitType: "fix",
+      semanticCommitScope: "deps",
+    },
+    {
+      description: "bjw-s common library updates release a chart patch",
+      matchManagers: ["helmv3"],
+      semanticCommitType: "fix",
+      semanticCommitScope: "deps",
+    },
+    {
+      description: "Major common library bumps are breaking and need manual review",
+      matchManagers: ["helmv3"],
+      matchUpdateTypes: ["major"],
+      dependencyDashboardApproval: true,
+    },
+    {
+      description: "GitHub Actions updates do not cut a chart release",
+      matchManagers: ["github-actions"],
+      semanticCommitType: "ci",
+      semanticCommitScope: "deps",
+    },
+  ],
+  customManagers: [
+    {
+      customType: "regex",
+      description: "Update container tags annotated with `# renovate: docker-image` in chart values",
+      managerFilePatterns: ["/^charts/trilium/values\\.yaml$/"],
+      matchStrings: [
+        "repository: (?<depName>[^\\s]+)\\n\\s+# renovate: docker-image\\n\\s+tag: \"?(?<currentValue>[^\\s\"]+)\"?",
+      ],
+      datasourceTemplate: "docker",
+    },
+  ],
+}
