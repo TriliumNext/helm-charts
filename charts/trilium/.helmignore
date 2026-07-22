@@ -28,3 +28,6 @@ OWNERS
 
 # helm unit tests
 tests/
+
+# CI values files
+ci/

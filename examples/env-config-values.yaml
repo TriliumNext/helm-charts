@@ -1,0 +1,13 @@
+# Configure Trilium through environment variables instead of (or on top of)
+# the configini block. TRILIUM_<SECTION>_<KEY> overrides config.ini values.
+controllers:
+  main:
+    containers:
+      trilium:
+        env:
+          TRILIUM_GENERAL_INSTANCENAME: my-trilium
+          TRILIUM_GENERAL_NOAUTHENTICATION: "false"
+          TRILIUM_NETWORK_TRUSTEDREVERSEPROXY: "true"
+        # For secrets (e.g. sync credentials), prefer envFrom with a Secret:
+        # envFrom:
+        #   - secret: trilium-secrets

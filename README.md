@@ -1,134 +1,98 @@
 # Trilium Helm Chart
 
-This is the Helm Chart for Trilium, to easily deploy Trilium on your Kubernetes cluster. This chart leverages the [bjw-s common library](https://github.com/bjw-s/helm-charts/blob/common-3.3.2/charts/library/common/values.yaml) which inherits all the possible [values](https://github.com/bjw-s/helm-charts/blob/common-3.3.2/charts/library/common/values.yaml) of that template.
+The Helm chart for [Trilium Notes](https://github.com/TriliumNext/Trilium), a hierarchical note taking application with a focus on building large personal knowledge bases.
 
-Please refer to the section "Modifying Deployed Resources" below on how to customize the deployment, or refer to the examples in [the examples folder](./examples/)
+The chart is built on the [bjw-s common library](https://github.com/bjw-s-labs/helm-charts/blob/common-5.0.1/charts/library/common/values.yaml), so every value the library supports can be set directly in this chart's values. See [Customizing the deployment](#customizing-the-deployment) below and the [examples folder](./examples/).
 
-Aside from the [values.yaml](./charts/trilium/values.yaml), please also view the additional files in the [templates](./charts/trilium/templates/) folder to see the additional values that are provided to Helm, to create the Kubernetes release. These values can also be overridden, and the defaults should be completely unobtrusive to any changes that are commonly made.
+## Installing
 
-If you find that a value in your release is inconsistent with those found in the [values.yaml](./charts/trilium/values.yaml) and the [bjw-s common library](https://github.com/bjw-s/helm-charts/blob/common-3.3.2/charts/library/common/values.yaml), then they are being modified in the [templates](./charts/trilium/templates/) folder. Any value changes specified by the user override any values defined within this chart.
-
-## Requirements
-
-- A working Kubernetes cluster.
-- A PVC provisioner.
-  - If you don't have one, but have something that serves an NFS share, take a look at the following
-    - [nfs-subdir-external-provisioner](https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner)
-    - [democratic-csi](https://github.com/democratic-csi/democratic-csi)
-
-## Deploying
+From the classic Helm repository:
 
 ```bash
 helm repo add trilium https://triliumnext.github.io/helm-charts
-helm install --create-namespace --namespace trilium trilium trilium/trilium -f values.yaml
+helm install trilium trilium/trilium --namespace trilium --create-namespace
 ```
 
-### Example values
+Or from the OCI registry:
 
-Below are some examples of what you could provide for the chart's values, for additional examples, please check out [the examples folder](./examples/).
+```bash
+helm install trilium oci://ghcr.io/triliumnext/helm-charts/trilium --namespace trilium --create-namespace
+```
+
+Charts published to the OCI registry are signed with cosign. Verify a version with:
+
+```bash
+cosign verify ghcr.io/triliumnext/helm-charts/trilium:<version> \
+  --certificate-identity-regexp 'https://github.com/TriliumNext/helm-charts/.*' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
+By default the chart creates a 20Gi PersistentVolumeClaim for your notes, so all you need is a working PVC provisioner in the cluster. The PVC is annotated so it survives `helm uninstall`.
+
+## Upgrading from 1.x to 2.0.0
+
+Version 2.0.0 is a breaking release. What changed:
+
+- The bjw-s common library was upgraded from 3.3.2 to 5.0.1. The Deployment selector labels changed, and selector labels are immutable in Kubernetes, so the old Deployment has to be deleted once before upgrading.
+- The container image moved from `triliumnext/notes` to `triliumnext/trilium` (the old image name no longer receives updates), and the default version is now v0.104.0.
+- Health probes now use `GET /api/health-check` instead of `/login`. Trilium v0.104.0 rate limits `/login`, which made the old probes restart-loop the pod ([TriliumNext/Trilium#10617](https://github.com/TriliumNext/Trilium/issues/10617)).
+- The chart now creates its own PVC by default. `persistence.data.existingClaim` is still fully supported, it is just no longer required. All 1.x installs used an existing claim, and upgrades keep using it, so your data is untouched.
+- A dedicated ServiceAccount is now created for the pod, with `automountServiceAccountToken: false`.
+
+Steps to upgrade:
+
+```bash
+# 1. Take a backup of your Trilium data (always a good idea before upgrades).
+
+# 2. Delete the old Deployment. Your PVC and data are not affected.
+kubectl --namespace <namespace> delete deployment <release-name>
+
+# 3. Upgrade the release.
+helm repo update
+helm upgrade <release-name> trilium/trilium --namespace <namespace> -f your-values.yaml
+```
+
+Notes:
+
+- If your values pin `triliumnext/notes` as the image repository, remove that override. The image name changed upstream.
+- Trilium migrates its database format on the first start of v0.104.0. The migration is automatic, but it is one more reason to take the backup in step 1.
+- Your values file keeps the same flat shape as before. The `configini` block, `persistence.data.existingClaim`, ingress definitions, and other common library overrides all keep working.
+
+## Persistence
+
+The chart provisions a `ReadWriteOnce` PVC by default (Trilium uses SQLite, so the volume must not be shared between nodes):
 
 ```yaml
-controllers:
-  main:
-    containers:
-      trilium:
-        image:
-          repository: triliumnext/notes
-          tag: v0.90.8
-          pullPolicy: IfNotPresent
-        env:
-          key: "value"
-
 persistence:
   data:
-    enabled: true
-    type: persistentVolumeClaim
-    existingClaim: trilium-data-pvc
+    size: 20Gi
+    # storageClass: my-storage-class
 ```
 
-## Using Helm CLI
+The PVC carries the `helm.sh/resource-policy: keep` annotation, so uninstalling the release leaves your notes in place.
 
-```bash
-helm repo add trilium https://triliumnext.github.io/helm-charts
-helm install --create-namespace --namespace trilium trilium trilium/trilium
-```
-
-## Using GitOps
-
-If you want to use GitOps, essentially using a Git repository as the single source of truth for the applications in your cluster, you can use tools such as ArgoCD or Flux. Below is an example of what an "Application" that creates a Helm release in ArgoCD looks like:
+To bring your own PVC instead:
 
 ```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: trilium
-  namespace: argocd
-
-spec:
-  project: default
-  source:
-    chart: trilium
-    repoURL: https://trilium-next.github.io/helm-charts
-    targetRevision: 1.3.0
-    helm:
-      values: |
-        controllers:
-          main:
-            containers:
-              trilium:
-                image:
-                  repository: triliumnext/notes
-                  tag: v0.92.4
-                  pullPolicy: IfNotPresent
-              env:
-                key: "value"
-
-        persistence:
-          data:
-          enabled: true
-          type: persistentVolumeClaim
-          existingClaim: my-claim-1
-  destination:
-    server: "https://kubernetes.default.svc"
-    namespace: apps
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true 
+persistence:
+  data:
+    existingClaim: my-existing-claim
 ```
 
-### Modifying Deployed Resources
+## Configuration
 
-Often times, modifications need to be made to a Helm chart to allow it to operate in your Kubernetes cluster. By utilizing bjw-s's `common` library, there are quite a few options that can be easily modified.
+### config.ini
 
-Anything you see [here](https://github.com/bjw-s/helm-charts/blob/d9e8c23df242dd9a2dda7c3738360928526d7a20/charts/library/common/values.yaml), including the top-level keys, can be added and subtracted from this chart's `values.yaml`.
-
-For example, if you wished to create a `serviceAccount`, refer to the values [here](https://github.com/bjw-s/helm-charts/blob/d9e8c23df242dd9a2dda7c3738360928526d7a20/charts/library/common/values.yaml#L364-L376), and override them as needed. So, to create a `serviceAccount`, you would want to add YAML below to your Helm release values:
-
-```yaml
-serviceAccount:
-  create: true
-```
-
-Then, (for some reason), if you wished to change the Deployment type to `DaemonSet`, ([referencing the values here](https://github.com/bjw-s/helm-charts/blob/d9e8c23df242dd9a2dda7c3738360928526d7a20/charts/library/common/values.yaml#L96)), you could do the following:
-
-```yaml
-controllers:
-  main:
-    type: daemonset
-```  
-
-## Modifying the `config.ini`
-
-Trilium also has a `config.ini` that allows you to [modify some values](https://github.com/TriliumNext/Notes/blob/7ca4cddc5868f4a80b8804ad93a35bf4bc8cc812/config-sample.ini). The values you set within them are mostly self-explanatory, but if you need to change any of the values, modify the following section within the `values.yaml` to the value you want them to be.
+The `configini` block renders Trilium's `config.ini` into a ConfigMap. Changing it automatically restarts the pod so the new settings take effect:
 
 ```yaml
 configini:
   general:
     instanceName: ""
-    # Disable authentication to Trilium? (if you're running it on a private network, or have authentication handled by another component)
+    # Disable authentication (for private networks, or when auth is handled
+    # by another component in front of Trilium)
     noAuthentication: false
-    # Disable backups of the database?
+    # Disable automatic database backups
     noBackup: false
   network:
     host: "0.0.0.0"
@@ -139,14 +103,129 @@ configini:
     trustedReverseProxy: true
 ```
 
-## Development
+### Environment variables
 
-To use Helm in order to create the individual Kubernetes manifests needed to deploy it "by hand", you can use the following commands:
+Trilium can also be configured through environment variables named `TRILIUM_<SECTION>_<KEY>`, which override the corresponding `config.ini` values:
+
+```yaml
+controllers:
+  main:
+    containers:
+      trilium:
+        env:
+          TRILIUM_GENERAL_INSTANCENAME: my-trilium
+          TRILIUM_NETWORK_TRUSTEDREVERSEPROXY: "true"
+```
+
+For secret values, prefer a Kubernetes Secret loaded with `envFrom`:
+
+```yaml
+controllers:
+  main:
+    containers:
+      trilium:
+        envFrom:
+          - secret: trilium-secrets
+```
+
+## Permissions (UID/GID)
+
+Trilium runs as UID/GID 1000 by default. An init container fixes the ownership of the data directory before Trilium starts, and the image entrypoint drops to the same UID/GID. To run as a different user:
+
+```yaml
+permissions:
+  uid: 568
+  gid: 568
+
+defaultPodOptions:
+  securityContext:
+    fsGroup: 568
+```
+
+If your storage already handles ownership (or you do not want a root init container), disable it:
+
+```yaml
+controllers:
+  main:
+    initContainers:
+      fixperms:
+        enabled: false
+```
+
+## Exposing Trilium
+
+An ingress example in the common library 5.x shape:
+
+```yaml
+ingress:
+  main:
+    enabled: true
+    className: nginx
+    annotations:
+      # remove the request body size limit for large file uploads
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    hosts:
+      - host: trilium.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: main
+              port: http
+```
+
+## Customizing the deployment
+
+Anything from the [common library values](https://github.com/bjw-s-labs/helm-charts/blob/common-5.0.1/charts/library/common/values.yaml) can be set at the top level of this chart's values and is merged with the chart defaults. For example, to run as a DaemonSet:
+
+```yaml
+controllers:
+  main:
+    type: daemonset
+```
+
+The chart's health probes target Trilium's unauthenticated `GET /api/health-check` endpoint. If you run an older Trilium version that lacks it, override `controllers.main.containers.trilium.probes` in your values.
+
+## GitOps
+
+An ArgoCD Application using this chart (see [examples/argocd-application.yaml](./examples/argocd-application.yaml) for the full file):
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: trilium
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: trilium
+    repoURL: https://triliumnext.github.io/helm-charts
+    targetRevision: 2.0.0
+    helm:
+      values: |
+        persistence:
+          data:
+            size: 20Gi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: trilium
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+```
+
+## Development
 
 ```bash
 git clone https://github.com/TriliumNext/helm-charts
-cd helm-chart/charts/trilium
-helm dependency update
-helm package .
-helm template test1 . --namespace testing -f values.yaml --debug > output.yaml
+cd helm-charts
+helm dependency update charts/trilium
+helm lint charts/trilium
+helm template trilium charts/trilium > output.yaml
 ```
+
+Releases are automated with [release-please](https://github.com/googleapis/release-please): pull request titles follow [Conventional Commits](https://www.conventionalcommits.org/) (they become the squash commit messages), and merging the generated release PR tags the release, publishes the chart to the GitHub release, the `https://triliumnext.github.io/helm-charts` index, and `oci://ghcr.io/triliumnext/helm-charts`, and signs the OCI artifact with cosign.

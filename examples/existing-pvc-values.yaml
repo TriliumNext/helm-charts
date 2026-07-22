@@ -1,0 +1,4 @@
+# Use an existing PVC instead of letting the chart create one.
+persistence:
+  data:
+    existingClaim: my-claim-1
