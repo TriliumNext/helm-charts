@@ -108,12 +108,16 @@ jobs:
           mkdir -p head base
           helm dependency build charts/trilium
           helm template trilium charts/trilium > head/manifest.yaml
-          helm dependency build main/charts/trilium
-          # The fallback flag keeps the diff working against the pre-2.0 chart,
-          # which refuses to render without an existing claim.
-          helm template trilium main/charts/trilium > base/manifest.yaml 2>/dev/null \
-            || helm template trilium main/charts/trilium --set persistence.data.existingClaim=diff-placeholder > base/manifest.yaml \
-            || echo "# main failed to render" > base/manifest.yaml
+          # Base-side failures must not fail the job: the chart on main may be
+          # unbuildable (a dependency repo that went away) or need extra values
+          # to render. The diff comment then shows against an empty base.
+          if helm dependency build main/charts/trilium; then
+            helm template trilium main/charts/trilium > base/manifest.yaml 2>/dev/null \
+              || helm template trilium main/charts/trilium --set persistence.data.existingClaim=diff-placeholder > base/manifest.yaml \
+              || echo "# failed to render the chart on main" > base/manifest.yaml
+          else
+            echo "# failed to build dependencies for the chart on main" > base/manifest.yaml
+          fi
 
       - name: Comment manifest diff
         if: steps.changes.outputs.chart == 'true'
