@@ -6,7 +6,7 @@ description: |-
 home: https://github.com/TriliumNext/helm-charts
 icon: https://raw.githubusercontent.com/TriliumNext/Trilium/main/apps/client/src/assets/icon.png
 # Managed by release-please.
-version: 1.3.0
+version: 2.0.0
 # renovate: image=triliumnext/trilium
 appVersion: v0.104.0
 kubeVersion: ">=1.28.0-0"
