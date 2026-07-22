@@ -123,9 +123,19 @@ jobs:
             echo "# failed to build dependencies for the chart on main" > base/manifest.yaml
           fi
 
-      - name: Comment manifest diff
+      - name: Render manifest diff
+        id: diff
         if: steps.changes.outputs.chart == 'true'
         uses: int128/diff-action@d568d28eca4411ad141d5cd5f84c7b739a0956ce # v2.31.0
         with:
           base: base
           head: head
+
+      - name: Comment manifest diff
+        if: steps.changes.outputs.chart == 'true'
+        uses: int128/comment-action@9448863881c42b4c69f213d9a67c8b37e7c0f105 # v1.68.0
+        with:
+          update-if-exists: replace
+          post: |
+            ## Changes in the rendered manifests
+            ${{ steps.diff.outputs.comment-body || 'No changes detected.' }}
