@@ -26,10 +26,15 @@ jobs:
       tag_name: ${{ steps.release.outputs['charts/trilium--tag_name'] }}
       version: ${{ steps.release.outputs['charts/trilium--version'] }}
     steps:
+      # A PAT (RELEASE_PLEASE_TOKEN) is used instead of GITHUB_TOKEN because
+      # the org policy does not allow Actions to create pull requests, and a
+      # PAT-created release PR also gets normal PR validation runs. Falls back
+      # to GITHUB_TOKEN when the secret is not set.
       - name: Release Please
         id: release
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
