@@ -1,0 +1,32 @@
+# ArgoCD Application deploying the Trilium chart.
+# Swap repoURL/chart for the OCI form if you prefer:
+#   repoURL: ghcr.io/triliumnext/helm-charts
+#   chart: trilium
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: trilium
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: trilium
+    repoURL: https://triliumnext.github.io/helm-charts
+    targetRevision: 2.0.0
+    helm:
+      values: |
+        persistence:
+          data:
+            size: 20Gi
+        configini:
+          network:
+            trustedReverseProxy: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: trilium
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

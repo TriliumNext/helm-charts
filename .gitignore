@@ -1,6 +1,5 @@
 # Ignore the debugging output
 charts/trilium/charts/
-charts/trilium/Chart.lock
 
 # Testing
 __snapshot__/

@@ -1,0 +1,17 @@
+# Expose Trilium through an Ingress.
+ingress:
+  main:
+    enabled: true
+    className: nginx
+    annotations:
+      # remove the request body size limit for large file uploads
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    hosts:
+      - host: trilium.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+            service:
+              identifier: main
+              port: http
+    tls: []

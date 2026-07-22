@@ -1,0 +1,7 @@
+permissions:
+  uid: 568
+  gid: 568
+
+defaultPodOptions:
+  securityContext:
+    fsGroup: 568

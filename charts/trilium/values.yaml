@@ -1,49 +1,181 @@
-## This chart relies on the common library chart from bjw-s
-## You can find it and the values you can provide and modify, at https://github.com/bjw-s/helm-charts/blob/common-3.3.2/charts/library/common/values.yaml
-## Refer there for more detail about the supported values.
-## Any values that you find in the above `values.yaml` can be provided to this chart and are then rendered.
+## Default values for the Trilium chart.
+##
+## This chart is powered by the bjw-s common library chart. Any value supported
+## by the common library can be set or overridden here or in your own values
+## file, and Helm merges it with these defaults. See the library reference:
+## https://github.com/bjw-s-labs/helm-charts/blob/common-5.0.1/charts/library/common/values.yaml
 
 controllers:
   main:
+    initContainers:
+      ## Fixes ownership of the Trilium data directory before Trilium starts.
+      ## The UID/GID come from the `permissions` block below. Disable with:
+      ## controllers.main.initContainers.fixperms.enabled: false
+      fixperms:
+        enabled: true
+        image:
+          repository: busybox
+          # renovate: docker-image
+          tag: "1.37.0"
+          pullPolicy: IfNotPresent
+        command:
+          - sh
+          - -c
+          - chown -R "${PUID}:${PGID}" /home/node/trilium-data
+        env:
+          PUID: "{{ .Values.permissions.uid }}"
+          PGID: "{{ .Values.permissions.gid }}"
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+
     containers:
       trilium:
         image:
-          repository: triliumnext/notes
-          tag: v0.92.4
+          repository: triliumnext/trilium
+          # renovate: docker-image
+          tag: v0.104.0
           pullPolicy: IfNotPresent
         env:
-          key: "value"
+          ## The Trilium image entrypoint drops to this UID/GID before starting.
+          USER_UID: "{{ .Values.permissions.uid }}"
+          USER_GID: "{{ .Values.permissions.gid }}"
+          ## Trilium can also be configured entirely through environment
+          ## variables named TRILIUM_<SECTION>_<KEY>. They override values
+          ## from config.ini (see the `configini` section below). Examples:
+          # TRILIUM_GENERAL_INSTANCENAME: my-trilium
+          # TRILIUM_GENERAL_NOAUTHENTICATION: "false"
+          # TRILIUM_NETWORK_TRUSTEDREVERSEPROXY: "true"
+          # TRILIUM_SYNC_SYNCSERVERHOST: https://sync.example.com
+        probes:
+          ## Readiness and liveness use Trilium's health endpoint, which needs
+          ## no authentication and is not rate limited (the previous /login
+          ## probe target is rate limited as of Trilium v0.104.0).
+          startup:
+            enabled: true
+            type: TCP
+            spec:
+              initialDelaySeconds: 5
+              periodSeconds: 5
+              timeoutSeconds: 5
+              failureThreshold: 30
+          readiness:
+            enabled: true
+            type: HTTP
+            path: /api/health-check
+            spec:
+              periodSeconds: 20
+              timeoutSeconds: 10
+              failureThreshold: 3
+          liveness:
+            enabled: true
+            type: HTTP
+            path: /api/health-check
+            spec:
+              periodSeconds: 20
+              timeoutSeconds: 10
+              failureThreshold: 3
+
+## UID/GID that Trilium runs as and that the fixperms init container chowns
+## the data directory to. Keep defaultPodOptions.securityContext.fsGroup below
+## in sync when changing these.
+permissions:
+  uid: 1000
+  gid: 1000
+
+defaultPodOptions:
+  securityContext:
+    ## Keep in sync with permissions.gid above.
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
+
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 8080
 
 persistence:
   data:
     enabled: true
     type: persistentVolumeClaim
-    existingClaim:
+    ## Trilium uses SQLite, so the volume must not be shared between nodes.
+    accessMode: ReadWriteOnce
+    size: 20Gi
+    ## Keep the PVC (and your notes) when the release is uninstalled.
+    retain: true
+    ## Keeps the PVC named <release fullname>-data.
+    suffix: data
+    ## Set this to use an existing PVC instead of creating one:
+    # existingClaim: my-existing-claim
+    globalMounts:
+      - path: /home/node/trilium-data
+  config:
+    enabled: true
+    type: configMap
+    identifier: config
+    advancedMounts:
+      main:
+        trilium:
+          - path: /home/node/trilium-data/config.ini
+            subPath: config.ini
+            readOnly: true
 
-# This is used to modify the config.ini of the Trilium instance
+configMaps:
+  config:
+    enabled: true
+    ## Keeps the ConfigMap named <release fullname>-config.
+    suffix: config
+    data:
+      config.ini: |
+        [General]
+        instanceName={{ .Values.configini.general.instanceName }}
+        noAuthentication={{ .Values.configini.general.noAuthentication }}
+        noBackup={{ .Values.configini.general.noBackup }}
+
+        [Network]
+        host={{ .Values.configini.network.host }}
+        port={{ .Values.configini.network.port }}
+        https={{ .Values.configini.network.https }}
+        certPath={{ .Values.configini.network.certPath }}
+        keyPath={{ .Values.configini.network.keyPath }}
+        trustedReverseProxy={{ .Values.configini.network.trustedReverseProxy }}
+
+## Rendered into the config.ini above. Environment variables (TRILIUM_*)
+## override these at runtime.
 configini:
   general:
+    ## Instance name, used to distinguish instances during sync.
     instanceName: ""
-    # Disable authentication to Trilium? (if you're running it on a private network, or have authentication handled by another component)
+    ## Disable authentication entirely (for private networks, or when auth is
+    ## handled by another component in front of Trilium).
     noAuthentication: false
-    # Disable backups of the database?
+    ## Disable automatic database backups.
     noBackup: false
   network:
     host: "0.0.0.0"
+    ## Keep in sync with service.main.ports.http.port above.
     port: 8080
     https: false
     certPath: ""
     keyPath: ""
     trustedReverseProxy: true
-#ingress:
-#  main:
-#    enabled: true
-#    annotations:
-#      # proxy-body-size is set to 0 to remove the body limit on file uploads
-#      nginx.ingress.kubernetes.io/proxy-body-size: "0"
-#    hosts:
-#      - host: trilium.local
-#        paths:
-#          - path: "/api/v1"
-#    tls: []
 
+## Example ingress definition (bjw-s common 5.x shape):
+# ingress:
+#   main:
+#     enabled: true
+#     className: nginx
+#     annotations:
+#       ## Remove the request body size limit for large file uploads.
+#       nginx.ingress.kubernetes.io/proxy-body-size: "0"
+#     hosts:
+#       - host: trilium.example.com
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             service:
+#               identifier: main
+#               port: http
+#     tls: []
